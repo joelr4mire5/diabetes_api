@@ -1,15 +1,50 @@
 name: CI model to dockerhub
 
-# Trigger
 on:
+  push:
+    branches:
+      - dev
   pull_request:
     branches:
       - dev
-      - master
 
-# Acciones
 jobs:
+  retraining_model:
+    runs-on: ubuntu-latest
+    container: docker://dvcorg/cml:latest
+    env:
+      repo_token: ${{ secrets.GITHUBTOKEN }}
+    steps:
+        
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Upgrade pip
+        run: pip install --upgrade pip
+
+      - name: Install requirements
+        run:
+          pip3 install -r requirements.txt
+
+      - name: Execute the training model
+        run: |
+          python3 retraining.py
+
+      - name: Generating report
+        run: |
+          echo "## Model metrics" > report.md
+          cat metrics.txt >> report.md
+          
+          echo "## Data visualization" >> report.md
+          cml-publish feature_importance.png --md >> report.md
+          
+          cml-send-comment report.md
+
   build_docker_image:
+    needs: retraining_model
     runs-on: ubuntu-latest
 
     steps:
@@ -26,9 +61,23 @@ jobs:
         run: docker build -t joelr4mire5/diabetes_api:v1 .
 
       - name: Docker push to Dockerhub
-        run: docker push joelr4mire5/diabetes_api:v1
+        run: docker push joelr4mire5/diabetes_api:v1 .
 
+      - name: Login into the server
+        run: echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
 
-
-
-
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USERNAME }}
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          script: |
+            docker login -u '${{ secrets.DOCKER_USERNAME }}' -p '${{ secrets.DOCKER_PASSWORD }}'
+            if docker ps --all | grep diabetes; then
+              docker stop diabetes
+              docker rm diabetes
+            fi
+            
+            docker pull ${{ secrets.DOCKER_USERNAME }}/deploy-breast-cancer:v1
+            docker run -d --name breast-cancer -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
