@@ -49,10 +49,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build docker image
-        run: docker build -t joelr4mire5/diabetes_api:v1 .
+        run: docker build -t ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1 .
 
       - name: Docker push to Dockerhub
-        run: docker push joelr4mire5/diabetes_api:v1 .
+        run: docker push ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1 .
 
       - name: Login into the server
         run: echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
@@ -71,4 +71,4 @@ jobs:
             fi
             
             docker pull ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
-            docker run -d --name diabetes -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
+            docker run -d --name diabetes_api -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
