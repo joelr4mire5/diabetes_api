@@ -1,4 +1,4 @@
-unvicorn
+uvicorn
 pandas
 numpy
 scikit-learn
