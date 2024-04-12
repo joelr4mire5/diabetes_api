@@ -2,7 +2,6 @@ from fastapi import FastAPI, status, HTTPException
 from fastapi.responses import JSONResponse
 import pandas as pd
 import joblib
-import uvicorn
 
 
 app = FastAPI(
