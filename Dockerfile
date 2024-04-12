@@ -13,7 +13,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 WORKDIR /app
 
 # Copy the requirements file into the container at /app
-COPY requirements.txt.
+COPY requirements.txt .
 
 # Install any dependencies
 RUN pip install  -r requirements.txt
