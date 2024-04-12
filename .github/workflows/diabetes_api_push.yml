@@ -36,7 +36,7 @@ jobs:
 
   build_docker_image:
     needs: retraining_model
-    runs-on: ubuntu-latest
+    runs-on: amazonlinux:latest
 
     steps:
       - name: Check the repo
@@ -65,9 +65,9 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             docker login -u '${{ secrets.DOCKER_USERNAME }}' -p '${{ secrets.DOCKER_PASSWORD }}'
-            if docker ps --all | grep diabetes; then
-              docker stop diabetes
-              docker rm diabetes
+            if docker ps --all | grep diabetes_api; then
+              docker stop diabetes_api
+              docker rm diabetes_api
             fi
             
             docker pull ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
