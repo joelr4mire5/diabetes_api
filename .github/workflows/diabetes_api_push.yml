@@ -31,17 +31,8 @@ jobs:
 
       - name: Execute the training model
         run: |
-          python3 retraining.py
+          python3 main.py
 
-      - name: Generating report
-        run: |
-          echo "## Model metrics" > report.md
-          cat metrics.txt >> report.md
-          
-          echo "## Data visualization" >> report.md
-          cml-publish feature_importance.png --md >> report.md
-          
-          cml-send-comment report.md
 
   build_docker_image:
     needs: retraining_model
@@ -79,5 +70,5 @@ jobs:
               docker rm diabetes
             fi
             
-            docker pull ${{ secrets.DOCKER_USERNAME }}/deploy-breast-cancer:v1
-            docker run -d --name breast-cancer -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
+            docker pull ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
+            docker run -d --name diabetes -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
