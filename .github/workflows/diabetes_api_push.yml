@@ -10,7 +10,7 @@ on:
 
 jobs:
   retraining_model:
-    runs-on: amazonlinux:latest
+    runs-on: ubuntu:latest
     container: docker://dvcorg/cml:latest
     env:
       repo_token: ${{ secrets.GITHUBTOKEN }}
@@ -36,7 +36,7 @@ jobs:
 
   build_docker_image:
     needs: retraining_model
-    runs-on: amazonlinux:latest
+    runs-on: ubuntu:latest
 
     steps:
       - name: Check the repo
