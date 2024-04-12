@@ -1,5 +1,6 @@
 # Use the official Python image from Docker Hub
-FROM python:3.11-slim
+
+FROM python:3.10.12
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -15,7 +16,7 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Install any dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install  -r requirements.txt
 
 # Copy the current directory contents into the container at /app
 COPY . .

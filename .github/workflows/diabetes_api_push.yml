@@ -10,7 +10,7 @@ on:
 
 jobs:
   retraining_model:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     container: docker://dvcorg/cml:latest
     env:
       repo_token: ${{ secrets.GITHUBTOKEN }}
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9
+          python-version: 3.10.12
 
       - name: Upgrade pip
         run: pip install --upgrade pip
@@ -31,21 +31,12 @@ jobs:
 
       - name: Execute the training model
         run: |
-          python3 retraining.py
+          python3 main.py
 
-      - name: Generating report
-        run: |
-          echo "## Model metrics" > report.md
-          cat metrics.txt >> report.md
-          
-          echo "## Data visualization" >> report.md
-          cml-publish feature_importance.png --md >> report.md
-          
-          cml-send-comment report.md
 
   build_docker_image:
     needs: retraining_model
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
 
     steps:
       - name: Check the repo
@@ -58,10 +49,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build docker image
-        run: docker build -t joelr4mire5/diabetes_api:v1 .
+        run: docker build -t joelr4mire5/diabetes_api:v2 .
 
       - name: Docker push to Dockerhub
-        run: docker push joelr4mire5/diabetes_api:v1 .
+        run: docker push joelr4mire5/diabetes_api:v2 .
 
       - name: Login into the server
         run: echo '${{ secrets.DOCKER_PASSWORD }}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
@@ -74,10 +65,10 @@ jobs:
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           script: |
             docker login -u '${{ secrets.DOCKER_USERNAME }}' -p '${{ secrets.DOCKER_PASSWORD }}'
-            if docker ps --all | grep diabetes; then
-              docker stop diabetes
-              docker rm diabetes
+            if docker ps --all | grep diabetes_api; then
+              docker stop diabetes_api
+              docker rm diabetes_api
             fi
             
-            docker pull ${{ secrets.DOCKER_USERNAME }}/deploy-breast-cancer:v1
-            docker run -d --name breast-cancer -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v1
+            docker pull ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v2
+            docker run -d --name diabetes_api -p 8000:8000 ${{ secrets.DOCKER_USERNAME }}/diabetes_api:v2
