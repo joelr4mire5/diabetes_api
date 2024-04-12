@@ -4,6 +4,7 @@ import pandas as pd
 import joblib
 import uvicorn
 
+
 app = FastAPI(
     title="Deploy diabetes model",
     version="0.0.1"
