@@ -1,6 +1,6 @@
 # Use the official Python image from Docker Hub
 
-FROM python:3.9.19
+FROM python:3.9-slim
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
